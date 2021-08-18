@@ -51,14 +51,15 @@ public class EstudianteDAO extends BaseConexion implements IEstudianteDAO{
             sentencia.setLong(7, estudiante.getFijo());
             sentencia.setString(8, estudiante.getCarrera());
             sentencia.executeUpdate();
+            
             desconectar();
             return true;
         } catch (Exception e) {
-            System.out.println("Error actualizarEstudiante" + e);
+            System.out.println("Error actualizarEstudiante:" + e);
             return false;
         }
     }
-    
+     
     //3. Eliminar estudiante:
     @Override
     public boolean eliminarEstudiante(String CorreoInst) {
@@ -105,6 +106,7 @@ public class EstudianteDAO extends BaseConexion implements IEstudianteDAO{
     @Override
     public modeloVO consultarPorCorreo(String CorreoInst) {
         try {
+            List<modeloVO> estudiantes = new ArrayList();
             conectar();
             PreparedStatement sentencia = conexion.prepareStatement("select * from estudiantes where CorreoInst=?");
             sentencia.setString(1, CorreoInst);
@@ -230,13 +232,15 @@ public class EstudianteDAO extends BaseConexion implements IEstudianteDAO{
     }
     //10. Consultar por celular:
     @Override
-    public modeloVO consultarPorCelular(Long Celular) {
+    public List<modeloVO> consultarPorCelular(Long Celular) {
         try {
+            List<modeloVO> estudiantes = new ArrayList();
             conectar();
             PreparedStatement sentencia = conexion.prepareStatement("select * from estudiantes where Celular=?");
             sentencia.setLong(1, Celular);
             ResultSet datos = sentencia.executeQuery();
-            if(datos.next()){
+            
+            while(datos.next()){
                 modeloVO estudiante = new modeloVO();
                 estudiante.setNombres(datos.getString("Nombres"));
                 estudiante.setApellidos(datos.getString("Apellidos"));
@@ -246,13 +250,11 @@ public class EstudianteDAO extends BaseConexion implements IEstudianteDAO{
                 estudiante.setCelular(datos.getLong("Celular"));
                 estudiante.setFijo(datos.getLong("Fijo"));
                 estudiante.setCarrera(datos.getString("Carrera"));
-                desconectar();
-                return estudiante;
-            }else{
-                desconectar();
-                return null;
-            }
-        } catch (Exception e) {
+                estudiantes.add(estudiante);
+                }
+            desconectar();
+            return estudiantes;
+            }catch (Exception e) {
             System.out.println("Error consultarPorCelular" + e);
             return null;
         }
